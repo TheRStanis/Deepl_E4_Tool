@@ -1,0 +1,6 @@
+{
+    "api_keys":["", ""],
+    "src_langs":["en", "de", "fr", "es", "it", "nl", "pl", "ru", "uk", "bg", "cs", "da", "el", "et", "fi", "hu", "lv", "lt", "ro", "sk", "sl", "sv"],
+    "target_langs":["uk", "en", "ru", "es", "it", "nl", "pl", "ru", "de", "bg", "cs", "da", "el", "et", "fi", "hu", "lv", "lt", "ro", "sk", "sl", "sv"],
+    "e4_tool_key":"ELocaleEnum::en_US"
+}
