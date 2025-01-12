@@ -173,24 +173,26 @@ class MainWindow(QMainWindow):
             self.api_checkboxes[0].setChecked(True)
 
     def insert_text(self):
+        # Очистити таблицю перед вставкою нового тексту
+        self.table.clearContents()
+        self.table.setRowCount(0)
+
         clipboard = QtWidgets.QApplication.clipboard()
         text = clipboard.text()
 
-        # Split the clipboard text into rows and columns based on newline and tab characters
+        # Розбиваємо текст з буфера обміну на рядки та стовпці
         rows = text.strip().split('\n')
         
-        # Insert the rows into the table
+        # Вставляємо рядки в таблицю
         for row_idx, row in enumerate(rows):
             columns = row.split('\t')
-            if len(columns) > 1:
-                # Ensure there are enough rows
-                if self.table.rowCount() <= row_idx:
-                    self.table.insertRow(row_idx)
-                for col_idx, column in enumerate(columns):
-                    self.table.setItem(row_idx, col_idx, QtWidgets.QTableWidgetItem(column))
+            self.table.insertRow(row_idx)
+            for col_idx, column in enumerate(columns):
+                self.table.setItem(row_idx, col_idx, QtWidgets.QTableWidgetItem(column))
         
-        # Call the translate function after inserting text
+        # Викликаємо функцію перекладу після вставки тексту
         self.translate()
+
 
     def copy_text(self):
         row_count = self.table.rowCount()
@@ -200,14 +202,38 @@ class MainWindow(QMainWindow):
                           for row in range(row_count)])
         clipboard.setText(text)
 
+
     def keyPressEvent(self, event):
-        """Перехоплюємо комбінацію клавіш для вставки тексту (Ctrl + V)."""
-        if event.matches(QtGui.QKeySequence.Paste):  # Перевіряємо, чи натиснута комбінація Ctrl + V
+        """Перехоплюємо комбінації клавіш для вставки та копіювання тексту."""
+        if event.matches(QtGui.QKeySequence.Paste):  # Ctrl + V
             self.insert_text()
             event.accept()
             self.translate()
+        elif event.matches(QtGui.QKeySequence.Copy):  # Ctrl + C
+            self.copy_selected_cells()
+            event.accept()
         else:
             super().keyPressEvent(event)
+
+    def copy_selected_cells(self):
+        """Копіюємо виділені клітинки таблиці у буфер обміну."""
+        selected_ranges = self.table.selectedRanges()
+        if not selected_ranges:
+            return
+
+        copied_text = ""
+        for selection_range in selected_ranges:
+            for row in range(selection_range.topRow(), selection_range.bottomRow() + 1):
+                row_text = []
+                for col in range(selection_range.leftColumn(), selection_range.rightColumn() + 1):
+                    item = self.table.item(row, col)
+                    row_text.append(item.text() if item else "")
+                copied_text += "\t".join(row_text) + "\n"
+
+        # Копіюємо текст у буфер обміну
+        clipboard = QtWidgets.QApplication.clipboard()
+        clipboard.setText(copied_text.strip())
+
 
     def translate(self):
         row_count = self.table.rowCount()
